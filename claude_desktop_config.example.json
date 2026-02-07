@@ -1,0 +1,10 @@
+{
+  "mcpServers": {
+    "git": {
+      "command": "/caminho/completo/para/mcp-git-server.sh",
+      "env": {
+        "GIT_WORKING_DIR": "/caminho/do/repositorio"
+      }
+    }
+  }
+}
