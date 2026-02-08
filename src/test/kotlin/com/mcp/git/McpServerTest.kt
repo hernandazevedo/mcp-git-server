@@ -60,7 +60,7 @@ class McpServerTest {
         assertNotNull(response.result)
 
         val result = json.decodeFromJsonElement<ToolListResult>(response.result!!)
-        assertEquals(7, result.tools.size)
+        assertEquals(8, result.tools.size)
 
         val toolNames = result.tools.map { it.name }
         assertTrue(toolNames.contains("git_status"))
@@ -70,6 +70,7 @@ class McpServerTest {
         assertTrue(toolNames.contains("git_branch"))
         assertTrue(toolNames.contains("git_checkout"))
         assertTrue(toolNames.contains("git_add"))
+        assertTrue(toolNames.contains("git_push"))
     }
 
     @Test

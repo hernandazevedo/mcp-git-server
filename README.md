@@ -15,6 +15,7 @@ This MCP server provides tools to perform Git operations through the MCP protoco
 5. **git_branch** - Lists/creates/deletes branches
 6. **git_checkout** - Restores files or switches branches
 7. **git_add** - Adds files to staging area
+8. **git_push** - Pushes commits to remote repository
 
 ## Requirements
 
@@ -232,6 +233,24 @@ echo '{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"git_status
     "name": "git_add",
     "arguments": {
       "files": "."
+    }
+  }
+}
+```
+
+### Push to remote
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 9,
+  "method": "tools/call",
+  "params": {
+    "name": "git_push",
+    "arguments": {
+      "remote": "origin",
+      "branch": "main",
+      "set_upstream": true,
+      "force": false
     }
   }
 }

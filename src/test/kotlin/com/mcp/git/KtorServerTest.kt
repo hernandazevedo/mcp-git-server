@@ -124,7 +124,7 @@ class KtorServerTest {
         assertNotNull(jsonResponse.result)
 
         val result = json.decodeFromJsonElement<ToolListResult>(jsonResponse.result!!)
-        assertEquals(7, result.tools.size)
+        assertEquals(8, result.tools.size)
     }
 
     @Test

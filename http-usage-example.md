@@ -160,6 +160,27 @@ curl -X POST http://localhost:8080/mcp \
   }'
 ```
 
+### Git Push
+
+```bash
+curl -X POST http://localhost:8080/mcp \
+  -H "Content-Type: application/json" \
+  -d '{
+    "jsonrpc": "2.0",
+    "id": 9,
+    "method": "tools/call",
+    "params": {
+      "name": "git_push",
+      "arguments": {
+        "remote": "origin",
+        "branch": "main",
+        "set_upstream": true,
+        "force": false
+      }
+    }
+  }'
+```
+
 ## 3. Use Test Scripts
 
 ### Automated Bash Script

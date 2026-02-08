@@ -222,4 +222,86 @@ class GitOperationsTest {
         assertTrue(result.getOrNull()?.contains("modified1") == true)
         assertFalse(result.getOrNull()?.contains("modified2") == true)
     }
+
+    @Test
+    fun `test push fails without remote configured`() {
+        // Create initial commit
+        val testFile = File(tempDir, "test.txt")
+        testFile.writeText("test content")
+        gitOps.commit("initial commit", addAll = true)
+
+        // Attempt to push without remote should fail
+        val result = gitOps.push()
+        assertTrue(result.isFailure)
+    }
+
+    @Test
+    fun `test push with remote succeeds when remote exists`() {
+        // Create a bare repository to act as remote
+        val remoteDir = File(tempDir.parentFile, "remote.git")
+        remoteDir.mkdirs()
+        ProcessBuilder("git", "init", "--bare")
+            .directory(remoteDir)
+            .start()
+            .waitFor()
+
+        // Add remote to working repository
+        ProcessBuilder("git", "remote", "add", "origin", remoteDir.absolutePath)
+            .directory(tempDir)
+            .start()
+            .waitFor()
+
+        // Create initial commit
+        val testFile = File(tempDir, "test.txt")
+        testFile.writeText("test content")
+        gitOps.commit("initial commit", addAll = true)
+
+        // Get current branch name
+        val branchProcess = ProcessBuilder("git", "branch", "--show-current")
+            .directory(tempDir)
+            .start()
+        val branchName = branchProcess.inputStream.bufferedReader().readText().trim()
+
+        // Push to remote
+        val result = gitOps.push("origin", branchName, setUpstream = true)
+        assertTrue(result.isSuccess, "Push should succeed: ${result.exceptionOrNull()?.message}")
+
+        // Clean up
+        remoteDir.deleteRecursively()
+    }
+
+    @Test
+    fun `test push with set upstream flag works`() {
+        // Create a bare repository to act as remote
+        val remoteDir = File(tempDir.parentFile, "remote2.git")
+        remoteDir.mkdirs()
+        ProcessBuilder("git", "init", "--bare")
+            .directory(remoteDir)
+            .start()
+            .waitFor()
+
+        // Add remote to working repository
+        ProcessBuilder("git", "remote", "add", "origin", remoteDir.absolutePath)
+            .directory(tempDir)
+            .start()
+            .waitFor()
+
+        // Create initial commit
+        val testFile = File(tempDir, "test.txt")
+        testFile.writeText("test content")
+        gitOps.commit("initial commit", addAll = true)
+
+        // Get current branch name
+        val branchProcess = ProcessBuilder("git", "branch", "--show-current")
+            .directory(tempDir)
+            .start()
+        val branchName = branchProcess.inputStream.bufferedReader().readText().trim()
+
+        // Push with set-upstream
+        val result = gitOps.push("origin", branchName, setUpstream = true)
+        assertTrue(result.isSuccess, "Push with set-upstream should succeed: ${result.exceptionOrNull()?.message}")
+
+        // Clean up
+        remoteDir.deleteRecursively()
+    }
 }

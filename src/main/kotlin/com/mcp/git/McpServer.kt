@@ -155,6 +155,31 @@ class McpServer(private val gitOps: GitOperations) {
                     })
                     put("required", buildJsonArray { add("files") })
                 }
+            ),
+            Tool(
+                name = "git_push",
+                description = "Update remote refs along with associated objects",
+                inputSchema = buildJsonObject {
+                    put("type", "object")
+                    put("properties", buildJsonObject {
+                        put("remote", buildJsonObject {
+                            put("type", "string")
+                            put("description", "Remote repository name (default: origin)")
+                        })
+                        put("branch", buildJsonObject {
+                            put("type", "string")
+                            put("description", "Branch name to push")
+                        })
+                        put("set_upstream", buildJsonObject {
+                            put("type", "boolean")
+                            put("description", "Set upstream tracking branch (default: false)")
+                        })
+                        put("force", buildJsonObject {
+                            put("type", "boolean")
+                            put("description", "Force push (default: false)")
+                        })
+                    })
+                }
             )
         )
 
@@ -179,6 +204,7 @@ class McpServer(private val gitOps: GitOperations) {
             "git_branch" -> callGitBranch(arguments)
             "git_checkout" -> callGitCheckout(arguments)
             "git_add" -> callGitAdd(arguments)
+            "git_push" -> callGitPush(arguments)
             else -> return errorResponse(request.id, -32602, "Unknown tool: $toolName")
         }
 
@@ -253,6 +279,18 @@ class McpServer(private val gitOps: GitOperations) {
 
         return gitOps.add(files).fold(
             onSuccess = { ToolCallResult(content = listOf(TextContent(text = if (it.isEmpty()) "Files added successfully" else it))) },
+            onFailure = { ToolCallResult(content = listOf(TextContent(text = it.message ?: "Unknown error")), isError = true) }
+        )
+    }
+
+    private fun callGitPush(arguments: JsonObject): ToolCallResult {
+        val remote = arguments["remote"]?.jsonPrimitive?.contentOrNull
+        val branch = arguments["branch"]?.jsonPrimitive?.contentOrNull
+        val setUpstream = arguments["set_upstream"]?.jsonPrimitive?.booleanOrNull ?: false
+        val force = arguments["force"]?.jsonPrimitive?.booleanOrNull ?: false
+
+        return gitOps.push(remote, branch, setUpstream, force).fold(
+            onSuccess = { ToolCallResult(content = listOf(TextContent(text = if (it.isEmpty()) "Pushed successfully" else it))) },
             onFailure = { ToolCallResult(content = listOf(TextContent(text = it.message ?: "Unknown error")), isError = true) }
         )
     }

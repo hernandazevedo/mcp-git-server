@@ -88,4 +88,26 @@ class GitOperations(private val workingDirectory: String = ".") {
     fun add(files: String): Result<String> {
         return executeCommand("git", "add", files)
     }
+
+    fun push(remote: String? = null, branch: String? = null, setUpstream: Boolean = false, force: Boolean = false): Result<String> {
+        val args = mutableListOf("git", "push")
+
+        if (setUpstream) {
+            args.add("--set-upstream")
+        }
+
+        if (force) {
+            args.add("--force")
+        }
+
+        if (remote != null) {
+            args.add(remote)
+        }
+
+        if (branch != null) {
+            args.add(branch)
+        }
+
+        return executeCommand(*args.toTypedArray())
+    }
 }
